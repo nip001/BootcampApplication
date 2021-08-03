@@ -1,24 +1,33 @@
 package com.juaracoding.controller;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gson.Gson;
 import com.juaracoding.entity.Perserta;
-import com.juaracoding.entity.Response;
 import com.juaracoding.service.ModelPerserta;
+import com.juaracoding.utility.FileUtility;
 
 @RestController
 @RequestMapping("/perserta")
@@ -28,69 +37,43 @@ public class PersertaController {
 	ModelPerserta modPerserta;
 	
 	@GetMapping("/")
-	public ResponseEntity<Response> getAll(){
-		
-		Response response = new Response();
-		
-		response.setStatusCode(200);
-		response.setPesan("Berhasil mendapatkan data");
-		
-		response.setData(this.modPerserta.getAllPerserta());
+	public ResponseEntity<List<Perserta>> getAll(){
 		
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(response);
+				.body(this.modPerserta.getAllPerserta());
 	}
 	
 	@PostMapping("/add")
-	public ResponseEntity<Response> addData(@RequestBody Perserta perserta){
+	public ResponseEntity<String> addData(@RequestParam(value = "file") MultipartFile images, @ModelAttribute(value="data") String dataJSON) throws IOException{
+		String filename = StringUtils.cleanPath(images.getOriginalFilename());
+
+		String uploadDir="src/main/java/user-photos/";
+		FileUtility.saveFile(uploadDir, filename, images);
+		Perserta perserta = new Gson().fromJson(dataJSON, Perserta.class);
+		perserta.setGambar(filename) ;
 		
-		Response response = new Response();
-		
-		response.setStatusCode(200);
-		response.setPesan("Berhasil memasukan data");
-		
-		response.setData(this.modPerserta.addPerserta(perserta));
 		
 		return ResponseEntity.status(HttpStatus.OK)
 				.contentType(MediaType.APPLICATION_JSON)
-				.body(response);
+				.body(this.modPerserta.addPerserta(perserta));
 	}
 
-	@PutMapping("/update/{id}")
-	public ResponseEntity<Response> updateData(@RequestBody Perserta perserta, @PathVariable String id){
-		
-		Response response = new Response();
-		
-		response.setStatusCode(200);
-		response.setPesan("Berhasil update data");
-		
-		perserta.setId(Long.parseLong(id));
-		response.setData(this.modPerserta.updatePerserta(perserta));
-		
-		return ResponseEntity.status(HttpStatus.OK)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(response);
-	}
-	
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<Response> deleteData(@PathVariable String id){
-		
-		Response response = new Response();
-		
-		response.setStatusCode(200);
-		response.setPesan("Berhasil delete data");
-		
-		response.setData(this.modPerserta.deletePerserta(id));
-		
-		return ResponseEntity.status(HttpStatus.OK)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(response);
-	}
-	
-	@GetMapping("/{id}")
+	@GetMapping("/id/{id}")
 	public Perserta getDataById(@PathVariable String id) {
 		return this.modPerserta.getByIdPerserta(id);
+	}
+	
+	@GetMapping("/name/{name}")
+	public List<Perserta> getDataByName(@PathVariable String name) {
+		return this.modPerserta.getAllPersertaByNamaPerserta(name);
+	}
+
+	@GetMapping(value = "/image/{name}", produces = MediaType.IMAGE_JPEG_VALUE)
+	public @ResponseBody byte[] getImageWithMediaType(@PathVariable String name) throws IOException{
+		final InputStream in = getClass().getResourceAsStream("/user-photos/"+name);
+		return IOUtils.toByteArray(in);
+		
 	}
 	
 	

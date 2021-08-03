@@ -47,4 +47,10 @@ public class ModelPerserta implements ModelPersertaInterface{
 		return "Berhasil menghapus data";
 	}
 
+	@Override
+	public List<Perserta> getAllPersertaByNamaPerserta(String name) {
+		// TODO Auto-generated method stub
+		return this.persertaRepo.findPersertaByNamaPerserta(name);
+	}
+
 }

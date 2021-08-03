@@ -25,4 +25,5 @@ public class Perserta {
 	private String batch;
 	private String alamat;
 	private String nohp;
+	private String gambar;
 }

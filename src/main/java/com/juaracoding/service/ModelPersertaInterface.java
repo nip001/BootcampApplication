@@ -11,5 +11,6 @@ public interface ModelPersertaInterface {
 	public String updatePerserta(Perserta perserta);
 	public Perserta getByIdPerserta(String id);
 	public String deletePerserta(String id);
+	public List<Perserta> getAllPersertaByNamaPerserta(String name);
 	
 }
