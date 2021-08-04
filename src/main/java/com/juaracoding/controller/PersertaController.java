@@ -58,6 +58,13 @@ public class PersertaController {
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(this.modPerserta.addPerserta(perserta));
 	}
+	
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteData(@PathVariable String id){
+		return ResponseEntity.status(HttpStatus.OK)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(this.modPerserta.deletePerserta(id));
+	}
 
 	@GetMapping("/id/{id}")
 	public Perserta getDataById(@PathVariable String id) {
